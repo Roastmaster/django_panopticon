@@ -18,35 +18,30 @@
                 <article class="box post post-excerpt">
                     <header>
                         <h2 style="display: inline;">
-                            Add a Sector
+                            {% if pages.home == "current" %}
+                                Dashboard for {{ farm.name }}
+                            {% elif pages.productivity == "current" %}
+                                Productivity
+                            {% elif pages.incidents == "current" %}
+                                Incident Management
+                            {% elif pages.employees == "current" %}
+                                 Employee Management
+                            {% else %}
+                                Request a New Feature
+                            {% endif %}
                         </h2>
                         <button style="float: right; display: inline; font-size: 14px;">
                             <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>
                         </button>
                     </header>
+                {% if pages.productivity == "current" or pages.incidents == "current" %}
+                    <div id="analytics_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                {%  endif %}
                 </article>
                 <article class="box post post-excerpt">
-                    <form action="add_sector" method="post">
-                            {% csrf_token %}
-                            <div class="input-container">
-                                <label for="Farm Name">Sector Name</label>
-                                {{ sectorForm.name }}
-                                <div class="bar"></div>
-                            </div>
-                            <div class="input-container">
-                                <label for="Farm Name">Farm</label>
-                                {{ sectorForm.farm }}
-                                <div class="bar"></div>
-                            </div>
-                            <div class="input-container">
-                                <label for="Farm Name">Crew Lead</label>
-                                {{ sectorForm.overseer }}
-                                <div class="bar"></div>
-                            </div>
-                            <div class="button-container" style="padding-top:20px">
-                                <button><span>Add new sector</span></button>
-                            </div>
-                    </form>
+                    {% if pages.employees == "current" %}
+                        {% include "employee_management.html" %}
+ -                  {% endif %}
                 </article>
             </div>
         </div>
