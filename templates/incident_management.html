@@ -57,16 +57,18 @@ tr:nth-child(even) {
             <th id="th3" style="font-weight: bold;">Incident ID</th>
             <th id="th3" style="...">Description</th>
             <th id="th3" style="font-weight: bold;">Sector</th>
-            <th id="th3" style="font-weight: bold;">Sector</th>
-            <th id="th3" style="...">Delete</th>
+            <th id="th3" style="font-weight: bold;">Reporter</th>
+            <th id="th3" style="font-weight: bold;">Time</th>
+            <th id="th3" style="...">Options</th>
         </tr>
         {%  for incident in incidents %}
             <tr class="hello" style="text-align: center;">
                 <td id="td3">{{ incident.id}}</td>
                 <td id="td3">{{ incident.description }}</td>
-                <td id="td3">{{ incident.sector }}</td>
-                <td id="td3">{{ incident.reporter.employer.first_name }}, {{ incident.reporter.employer.first_name }}</td>
-                <td id="td3"><button>View Profile</button></td>
+                <td id="td3">{{ incident.sector.name }}</td>
+                <th id="th3" style="font-weight: bold;">{{ incident.Reporter.first_name }}</th>
+                <td id="td3">{{ incident.creation_date }}</td>
+                <td id="td3"><button>Delete</button></td>
             </tr>
         {% endfor %}
     </table>

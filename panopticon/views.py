@@ -50,6 +50,12 @@ def dashboard(request):
     resetPages()
     pages["home"] = "current"
     template = loader.get_template('index.html')
+    soon_to_recover = []
+    weather = [] # line graph
+    percent_incapacitated = # pie graph
+    recent_incidents =[] # list
+    recently_completed = []
+
     context = {
         'pages': pages,
         'user': request.user,
