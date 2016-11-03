@@ -18,19 +18,7 @@
                 <article class="box post post-excerpt">
                     <header>
                         <h2 style="display: inline;">
-                            {% if pages.home == "current" %}
-                                Dashboard for {{ farm.name }}
-                            {% elif pages.productivity == "current" %}
-                                Productivity
-                            {% elif pages.incidents == "current" %}
-                                Incident Management
-                            {% elif pages.edit_site == "current" %}
-                                Edit facility Information
-                            {% elif pages.add_site == "current" %}
                                 Add new facility
-                            {% else %}
-                                Request a New Feature
-                            {% endif %}
                         </h2>
                         <button style="float: right; display: inline; font-size: 14px;">
                             <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>

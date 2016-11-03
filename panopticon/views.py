@@ -12,7 +12,7 @@ import datetime
 from panopticon.forms import farmForm, changeFarmForm
 # Create your views here.
 
-pages = {"home": "", "productivity": "", "incidents": "", "final": ""}
+pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit-site":"", "add-site":"", "change-site":""}
 
 @login_required
 def incident_report(request):
