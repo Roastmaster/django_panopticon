@@ -6,13 +6,41 @@ from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
+from django.template import loader
 import panopticon.models as models
 
 # Create your views here.
 
+pages = {"home": "", "productivity": "", "incidents": "", "final": ""}
+
 @login_required
 def dashboard(request):
-    return render(request, "index.html")
+    resetPages()
+    pages["home"] = "current"
+    template = loader.get_template('index.html')
+    context = {
+        'pages': pages,
+        'user': request.user
+    }
+    return HttpResponse(template.render(context, request))
+
+def productivity(request):
+    resetPages()
+    pages["productivity"] = "current"
+    template = loader.get_template('index.html')
+    context = {
+        'pages': pages
+    }
+    return HttpResponse(template.render(context, request))
+
+def incidents(request):
+    resetPages()
+    pages["incidents"] = "current"
+    template = loader.get_template('index.html')
+    context = {
+        'pages': pages
+    }
+    return HttpResponse(template.render(context, request))
 
 def create_user(request):
     if request.method == "GET":
@@ -48,7 +76,7 @@ def create_user(request):
                 if user:
                     if user.is_active:
                         login(request, user)
-                        return render(request, "index.html")
+                        return dashboard(request)
                     else:
                         return HttpResponse("Your account is disabled.")
                 else:
@@ -62,3 +90,7 @@ def user_logout(request):
 
     # Take the user back to the homepage.
     return HttpResponseRedirect('/')
+
+def resetPages():
+    for page in pages:
+        pages[page] = ""

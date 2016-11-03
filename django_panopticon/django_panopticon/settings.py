@@ -122,6 +122,6 @@ USE_TZ = True
 PROJECT_APP_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJECT_APP = os.path.basename(PROJECT_APP_PATH)
 PROJECT_ROOT = BASE_DIR = os.path.dirname(PROJECT_APP_PATH)
-STATICFILES_DIRS = ("C:/Users/maderr2/PycharmProjects/django_panopticon/static", )
+STATICFILES_DIRS = [os.path.join(BASE_DIR,"static")]
 STATIC_URL = '/static/'
 LOGIN_URL = '/new-user/'
