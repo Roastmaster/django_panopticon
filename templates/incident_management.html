@@ -10,6 +10,23 @@
         <!--[if lte IE 8]><link rel="stylesheet" href="{% static "css/ie8.css" %}" /><![endif]-->
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
+        <style>
+#table123 {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#td3, #th3 {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
     </head>
     <body>
         <!-- Content -->
@@ -18,50 +35,46 @@
                 <article class="box post post-excerpt">
                     <header>
                         <h2 style="display: inline;">
-                                Edit Facility Information
+                                Incident Management
                         </h2>
                         <button style="float: right; display: inline; font-size: 14px;">
                             <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>
                         </button>
                     </header>
-
+                    <div id="analytics_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
                 </article>
                 <article class="box post post-excerpt">
                     <div class="container">
-                        <form action="/edit_site/" method="post">
-                            {% csrf_token %}
-                            <div class="input-container">
-                                <label for="Farm Name">Farm Name</label>
-                                <input type="text" name="name" id="Username" required="required" value="{{ farm.name }}"/>
-                                <div class="bar"></div>
-                            </div>
-                            <div class="input-container">
-                                <label for="Street">Street</label>
-                                <input type="text" name="address" id="Username" required="required" value="{{ farm.address }}"/>
-
-                                <div class="bar"></div>
-                            </div>
-                             <div class="input-container">
-                                 <label for="State">State</label>
-                                <input type="text" name="state" id="Username" required="required" value="{{ farm.state}}"/>
-
-                                <div class="bar"></div>
-                            </div>
-                             <div class="input-container">
-                                 <label for="Zip">Zip</label>
-                                 <input type="text" name="zip" id="Username" required="required" value="{{ farm.zip }}"/>
-                                <div class="bar"></div>
-                            </div>
-                            <div class="button-container" style="padding-top:20px">
-                                <button><span>Submit Changes</span></button>
-                            </div>
-                        </form>
-                    </div>
+                        <header>
+                        <div>Bitch</div>
+                            {% if adding_lead != True %}
+                                <h3 style="display: inline;">Crew Leads: {{ employees|length }}</h3>
+                                <button style="background-color: green; display: inline; float: right;"><a href="/incidents/add_incident/" style="text-decoration: none; color: white;">+ Add new incident </a></button>
+                            {% endif %}
+                        </header>
+    <table id="table123">
+        <tr id="tr3">
+            <th id="th3" style="font-weight: bold;">Incident ID</th>
+            <th id="th3" style="...">Description</th>
+            <th id="th3" style="font-weight: bold;">Sector</th>
+            <th id="th3" style="font-weight: bold;">Sector</th>
+            <th id="th3" style="...">Delete</th>
+        </tr>
+        {%  for incident in incidents %}
+            <tr class="hello" style="text-align: center;">
+                <td id="td3">{{ incident.id}}</td>
+                <td id="td3">{{ incident.description }}</td>
+                <td id="td3">{{ incident.sector }}</td>
+                <td id="td3">{{ incident.reporter.employer.first_name }}, {{ incident.reporter.employer.first_name }}</td>
+                <td id="td3"><button>View Profile</button></td>
+            </tr>
+        {% endfor %}
+    </table>
+                  </div>
                 </article>
             </div>
         </div>
-
-		<!-- Sidebar -->
+        <!-- Sidebar -->
         <div id="sidebar">
 
             <!-- Logo -->
@@ -73,7 +86,9 @@
                     <li class="{{ pages.home }}"><a href="/">Home</a></li>
                     <li class="{{ pages.productivity }}"><a href="/productivity">Productivity</a></li>
                     <li class="{{ pages.incidents }}"><a href="/incidents">Incident Management</a></li>
-                    <li><a href="#">Request a Feature</a></li>
+                    <li class="{{ pages.employees }}"><a href="/employees">Employee Management</a></li>
+                    <li class="{{ pages.sectors }}"><a href="/sectors">Zoning Management</a></li>
+
                 </ul>
             </nav>
             <nav id="nav">
@@ -90,13 +105,11 @@
                 </div>
             </section>
 			</div>
-
-		<!-- Scripts -->
         <script src="{% static "js/jquery.min.js" %}"></script>
         <script src="{% static "js/skel.min.js" %}"></script>
         <script src="{% static "js/util.js" %}"></script>
         <!--[if lte IE 8]><script src="{% static "js/ie/respond.min.js" %}"></script><![endif]-->
         <script src="{% static "js/main.js" %}"></script>
-        <script src="{% static "js/analytics_chart.js" %}"></script>
-    </body>
+        <script src="{% static "js/real_time.js" %}"></script>
+</body>
 </html>

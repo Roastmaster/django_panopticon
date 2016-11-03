@@ -28,7 +28,7 @@ class Farm(models.Model):
         return self.name
 
 class FarmEmployee(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     farm = models.ForeignKey(Farm)
@@ -41,9 +41,16 @@ class Sector(models.Model):
     def __unicode__(self):
         return self.name
 
+class Qualification(models.Model):
+    name = models.CharField(_("Qualification"), max_length=100)
+    description = models.CharField(_("Description of qualification"), max_length=300)
+    def __unicode__(self):
+        return self.name
+
 class CrewLead(models.Model):
-    sector = models.OneToOneField(Sector)
+    sector = models.ForeignKey(Sector)
     employee = models.OneToOneField(FarmEmployee)
+    qualifications = models.ManyToManyField(Qualification, blank=True)
     def __unicode__(self):
         return self.employee.last_name+", "+self.employee.first_name
 
@@ -61,6 +68,7 @@ class Incident(models.Model):
     reporter = models.ManyToManyField(CrewLead)
     sector = models.ForeignKey(Sector)
     farm = models.ForeignKey(Farm)
+    creation_date = models.DateTimeField(auto_now_add=True, null=True)
 
 class Task(models.Model):
     title = models.CharField(max_length=60)

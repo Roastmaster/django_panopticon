@@ -9,7 +9,13 @@ from django.template import RequestContext
 from django.template import loader
 import panopticon.models as models
 import datetime
-from panopticon.forms import farmForm, changeFarmForm
+from panopticon.forms import farmForm, changeFarmForm, employeeForm, sectorForm, incidentForm
+import random
+import datetime
+import json
+from django.views.decorators.csrf import csrf_exempt
+
+
 # Create your views here.
 
 pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit-site":"", "add-site":"", "change-site":""}
@@ -63,7 +69,6 @@ def edit_site(request):
         }
         return HttpResponse(template.render(context, request))
     elif request.method == "POST":
-        print ("Hello")
         farm = request.user.farmemployee.farmowner.current_farm
         farm.name = request.POST['name']
         farm.zip = request.POST['zip']
@@ -111,7 +116,60 @@ def change_site(request):
         request.user.save()
         return dashboard(request)
 
+@login_required
+def employees(request):
+    resetPages()
+    pages["employees"] = "current"
+    workers = list()
+    template = loader.get_template('index.html')
+    context = {
+        'pages': pages,
+        'employees': [e for e in models.CrewLead.objects.all()]
+    }
+    return HttpResponse(template.render(context, request))
 
+@login_required
+def add_lead(request):
+    resetPages()
+    pages["employees"] = "current"
+    if request.method == "POST":
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        sector = request.POST['sector']
+        userFarm = request.user.farmemployee.farmowner.current_farm
+        newEmployee = models.FarmEmployee.objects.create(first_name=first_name, last_name=last_name, farm=userFarm)
+        if request.POST['isCrewLead']:
+            cl = models.CrewLead.objects.create(sector=models.Sector.objects.get(name=sector), employee=newEmployee)
+            cl.save()
+        newEmployee.save()
+        return employees(request)
+    else:
+        template = loader.get_template('add_lead.html')
+        employee_form = employeeForm()
+        context = {
+            'employeeForm': employee_form,
+            'pages': pages,
+        }
+        return HttpResponse(template.render(context, request))
+
+@csrf_exempt
+def incident_data(request):
+    if request.method == "POST":
+        interval = request.POST['timespan']
+        current_time = datetime.datetime.now()
+        if interval == 'instant':
+            return HttpResponse(json.dumps([current_time.strftime("%Y-%m-%dT%H:%M:%S"), random.randint(0,10)]))
+        elif interval == 'day':
+            print('wtf')
+            data = list()
+            today = datetime.datetime.utcnow().date()
+            iter_date = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+            while (iter_date < current_time):
+                iter_date = iter_date + datetime.timedelta(hours=1)
+                data.append([iter_date.strftime("%Y-%m-%d %H:%M:%S"), random.randint(0,10)])
+            return HttpResponse(json.dumps(data))
+
+@login_required
 def productivity(request):
     resetPages()
     pages["productivity"] = "current"
@@ -121,14 +179,66 @@ def productivity(request):
     }
     return HttpResponse(template.render(context, request))
 
+
+@login_required
 def incidents(request):
     resetPages()
     pages["incidents"] = "current"
-    template = loader.get_template('index.html')
+    template = loader.get_template('incident_management.html')
     context = {
-        'pages': pages
+        'pages': pages,
+        'incidents': [i for i in models.Incident.objects.all()]
     }
     return HttpResponse(template.render(context, request))
+
+def add_incident(request):
+    if request.method == "GET":
+        template = loader.get_template('add_incident.html')
+        incident_form = incidentForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
+        context = {
+            'incidentForm': incident_form,
+            'pages': pages,
+        }
+        return HttpResponse(template.render(context, request))
+    if request.method == "POST":
+        desc = request.POST['description']
+        farm = models.Farm.objects.get(name=request.POST['farm'])
+        employeesInvolved = request.POST.getlist('employees')
+        sector = models.Sector.objects.get(name=request.POST['sector'])
+        i = models.Incident.objects.create(description=desc, farm=farm, sector=sector)
+        for li in employeesInvolved:
+            i.employees_involved.add(li)
+        i.save()
+        return incidents(request)
+
+@login_required
+def sectors(request):
+    resetPages()
+    pages['sectors'] = "current"
+    template = loader.get_template('zoning_management.html')
+    context = {
+        'pages':pages,
+        'sectors': [s for s in models.Sector.objects.all()]
+    }
+    return HttpResponse(template.render(context, request))
+
+def add_sector(request):
+    if request.method == "POST":
+        name = request.POST['name']
+        farm = models.Farm.objects.get(name=request.POST['farm'])
+        newSector = models.Sector.objects.create(name=name, farm=farm)
+        overseer = request.POST.getlist('overseer')
+        newSector.save()
+        return sectors(request)
+    else:
+        template = loader.get_template('add_sector.html')
+        sector_form = sectorForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
+        context = {
+            'sectorForm': sector_form,
+            'pages': pages,
+        }
+        return HttpResponse(template.render(context, request))
+
 
 def create_user(request):
     if request.method == "GET":

@@ -1,0 +1,62 @@
+{% load static %}
+<head><style>
+#table123 {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#td3, #th3 {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even).hello {
+    background-color: #dddddd;
+}
+</style></head>
+<header>
+    {% if adding_lead != True %}
+        <h3 style="display: inline;">Crew Leads: {{ employees|length }}</h3>
+        <button style="background-color: green; display: inline; float: right;"><a href="add_lead" style="text-decoration: none; color: white;">+ Add new employee </a></button>
+    {% endif %}
+</header>
+{% if adding_lead == True %}
+    <form action="/employees/add_lead" method="post">
+        <div class="input-container">
+            <label for="First Name">First Name</label>
+            <input type="text" name="first_name" id="firstName" required/>
+        </div>
+        <div class="input-container">
+            <label for="Last Name">Last Name</label>
+            <input type="text" name="last_name" id="lastName" required/>
+        </div>
+        <div class="input-container">
+            <label for="Sector">Sector</label>
+            <input type="text" name="sector" id="sector"/>
+        </div>
+        <br/>
+        <button type="submit">
+            Add Crew Lead
+        </button>
+    </form>
+{% else %}
+    <table id="table123">
+        <tr id="tr3">
+            <th id="th3" style="font-weight: bold;">Name</th>
+            <th id="th3" style="...">Qualifications</th>
+            <th id="th3" style="font-weight: bold;">Section</th>
+            <th id="th3" style="...">Delete</th>
+        </tr>
+        {%  for employee in employees %}
+            <tr class="hello" style="text-align: center;">
+                <td id="td3">{{ employee.employee.last_name }}, {{ employee.employee.first_name }}</td>
+                <td id="td3">{% for q in employee.qualifications.all %}{{ q }}, {% endfor %}</td>
+                <td id="td3">{{ employee.sector.name }}</td>
+                <td id="td3"><button>View Profile</button></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+<script src="{% static "js/create-user-index.js" %}"></script>

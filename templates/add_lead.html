@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Main Portal</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        {% load static %}
+        <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+        <link rel="stylesheet" href="{%  static "css/main.css" %}"/>
+        <!--[if lte IE 8]><link rel="stylesheet" href="{% static "css/ie8.css" %}" /><![endif]-->
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    </head>
+    <body>
+        <!-- Content -->
+        <div id="content">
+            <div class="inner">
+                <article class="box post post-excerpt">
+                    <header>
+                        <h2 style="display: inline;">
+                            {% if pages.home == "current" %}
+                                Dashboard for {{ farm.name }}
+                            {% elif pages.productivity == "current" %}
+                                Productivity
+                            {% elif pages.incidents == "current" %}
+                                Incident Management
+                            {% elif pages.employees == "current" %}
+                                 Employee Management
+                            {% else %}
+                                Request a New Feature
+                            {% endif %}
+                        </h2>
+                        <button style="float: right; display: inline; font-size: 14px;">
+                            <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>
+                        </button>
+                    </header>
+                </article>
+                <article class="box post post-excerpt">
+                    <form action="add_lead.html" method="post">
+                            {% csrf_token %}
+                            <div class="input-container">
+                                <label for="Farm Name">First Name</label>
+                                {{ employeeForm.first_name }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Last Name</label>
+                                {{ employeeForm.last_name }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Sector</label>
+                                {{ employeeForm.sector }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Crew Leader</label>
+                               {{ employeeForm.isCrewLead }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="button-container" style="padding-top:20px">
+                                <button><span>Add new employee</span></button>
+                            </div>
+                    </form>
+                </article>
+            </div>
+        </div>
+
+		<!-- Sidebar -->
+        <div id="sidebar">
+
+            <!-- Logo -->
+            <h1 id="logo"><a href="#">PANOPTICON</a></h1>
+
+            <!-- Nav -->
+            <nav id="nav">
+                <ul>
+                    <li class="{{ pages.home }}"><a href="/">Home</a></li>
+                    <li class="{{ pages.productivity }}"><a href="/productivity">Productivity</a></li>
+                    <li class="{{ pages.incidents }}"><a href="/incidents">Incident Management</a></li>
+                    <li class="{{ pages.employees }}"><a href="/employees">Employee Management</a></li>
+                    <li class="{{ pages.sectors }}"><a href="/sectors">Zoning Management</a></li>
+                </ul>
+            </nav>
+            <nav id="nav">
+                <ul>
+                    <li class="{{ pages.edit_site }}"><a href="/edit-site">Edit Site</a></li>
+                    <li class="{{ pages.change_site }}"><a href="/change-site">Change Site</a></li>
+                    <li class="{{ pages.add_site }}"><a href="/add-site">Add facility</a></li>
+                </ul>
+            </nav>
+
+            <!-- Calendar -->
+            <section class="box calendar">
+                <div class="inner">
+                    <table>
+                        <caption>July 2014</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col" title="Monday">M</th>
+                            <th scope="col" title="Tuesday">T</th>
+                            <th scope="col" title="Wednesday">W</th>
+                            <th scope="col" title="Thursday">T</th>
+                            <th scope="col" title="Friday">F</th>
+                            <th scope="col" title="Saturday">S</th>
+                            <th scope="col" title="Sunday">S</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="4" class="pad"><span>&nbsp;</span></td>
+                            <td><span>1</span></td>
+                            <td><span>2</span></td>
+                            <td><span>3</span></td>
+                        </tr>
+                        <tr>
+                            <td><span>4</span></td>
+                            <td><span>5</span></td>
+                            <td><a href="#">6</a></td>
+                            <td><span>7</span></td>
+                            <td><span>8</span></td>
+                            <td><span>9</span></td>
+                            <td><a href="#">10</a></td>
+                        </tr>
+                        <tr>
+                            <td><span>11</span></td>
+                            <td><span>12</span></td>
+                            <td><span>13</span></td>
+                            <td class="today"><a href="#">14</a></td>
+                            <td><span>15</span></td>
+                            <td><span>16</span></td>
+                            <td><span>17</span></td>
+                        </tr>
+                        <tr>
+                            <td><span>18</span></td>
+                            <td><span>19</span></td>
+                            <td><span>20</span></td>
+                            <td><span>21</span></td>
+                            <td><span>22</span></td>
+                            <td><a href="#">23</a></td>
+                            <td><span>24</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="#">25</a></td>
+                            <td><span>26</span></td>
+                            <td><span>27</span></td>
+                            <td><span>28</span></td>
+                            <td class="pad" colspan="3"><span>&nbsp;</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+			</div>
+
+		<!-- Scripts -->
+        <script src="{% static "js/jquery.min.js" %}"></script>
+        <script src="{% static "js/skel.min.js" %}"></script>
+        <script src="{% static "js/util.js" %}"></script>
+        <!--[if lte IE 8]><script src="{% static "js/ie/respond.min.js" %}"></script><![endif]-->
+        <script src="{% static "js/main.js" %}"></script>
+        <script src="{% static "js/analytics_chart.js" %}"></script>
+        {% if pages.productivity == "current" %}
+            <script src="{% static "js/analytics_chart.js" %}"></script>
+        {% elif pages.incidents == "current" %}
+             <script src="{% static "js/real_time.js" %}"></script>
+        {% endif %}
+    </body>
+</html>
