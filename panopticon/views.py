@@ -35,8 +35,6 @@ def assign_new_task(request):
     desc = request.POST['description']
     assignee = request.POST['employee']
 
-    pass
-
 @login_required
 def task_complete(request):
     pass
@@ -110,6 +108,7 @@ def change_site(request):
         farm = models.Farm.objects.get(name=request.POST['farm'])
         request.user.farmemployee.farmowner.current_farm = farm
         request.user.farmemployee.farmowner.save()
+        request.user.save()
         return dashboard(request)
 
 
@@ -156,7 +155,12 @@ def create_user(request):
             newuser = authenticate(username=username,
                                     password=password,)
             login(request, newuser)
-            return render(request, "index.html")
+            template = loader.get_template("edit_site.html")
+            context = {
+                'user': request.user,
+                'farm': request.user.farmemployee.farmowner.current_farm
+            }
+            return HttpResponse(template.render(context, request))
         elif 'username' in request.POST:
             context = RequestContext(request)
             if request.method == 'POST':
