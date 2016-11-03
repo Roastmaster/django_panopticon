@@ -4,6 +4,21 @@ from panopticon.models import Sector, FIELD_CHOICES, TIME_CHOICES
 from panopticon.models import Farm
 from panopticon.models import CrewLead, FarmEmployee
 
+class changeFarmForm(forms.ModelForm):
+    farm = forms.ChoiceField([f.name, f.name] for f in Farm.objects.all())
+    class Meta:
+        model = Farm
+        fields = ("farm",)
+
+class farmForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter a name for your new farm (required)'}))
+    address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Street address'}))
+    state = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'State'}))
+    zip = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Zip'}))
+    class Meta:
+        model = Farm
+        fields = ("name", "address", "state", "zip")
+
 class sectorForm(forms.ModelForm):
     farm = forms.ChoiceField([(f, f) for f in Farm.objects.all()])
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Datatype name'}))
@@ -26,10 +41,15 @@ class qualificationsForm(forms.ModelForm):
     qualificationName = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name (required)'}), required=True)
 
 class CustomFieldForm(forms.ModelForm):
-    sector = forms.ChoiceField(choices=[(s.name, s.name) for s in Sector.objects.all()],
+    sector = forms.ChoiceField([(s.name, s.name) for s in Sector.objects.all()],
                                 widget=forms.RadioSelect(), required=True)
     label = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Field Name'}), required=True)
-    field_type = forms.CharField(choices=[(s, s) for s in FIELD_CHOICES], widget=forms.RadioSelect(),
+    field_type = forms.ChoiceField(choices=[(s, s) for s in FIELD_CHOICES], widget=forms.RadioSelect(),
                                  required=True)
     required_from_lead = forms.BooleanField(required=True)
-    required_frequency = forms.ChoiceField(choices=[(s, s) for s in TIME_CHOICES])
+    required_frequency = forms.ChoiceField([(s, s) for s in TIME_CHOICES])
+
+    class Meta:
+        model = CustomField
+        fields = ('sector','label','field_type','required_from_lead','required_frequency')
+

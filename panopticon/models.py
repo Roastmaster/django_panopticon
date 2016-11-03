@@ -21,6 +21,9 @@ TIME_CHOICES = [
 # Create your models here.
 class Farm(models.Model):
     name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100, blank=True)
+    zip = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
     def __unicode__(self):
         return self.name
 
@@ -46,7 +49,8 @@ class CrewLead(models.Model):
 
 class FarmOwner(models.Model):
     employee = models.OneToOneField(FarmEmployee)
-    farm = models.OneToOneField(Farm)
+    all_farms = models.ManyToManyField(Farm, related_name="list_of_all_farms")
+    current_farm = models.ForeignKey(Farm, related_name="current", null=True)
 
 class Squad(models.Model):
     lead = models.OneToOneField(CrewLead)
@@ -65,6 +69,7 @@ class Task(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True, null=True)
     end_date = models.DateTimeField(null=True)
 
+
 class CustomField(models.Model):
     sector = models.ForeignKey(Sector)
     label = models.CharField(max_length=100)
@@ -73,6 +78,7 @@ class CustomField(models.Model):
     required_frequency = models.IntegerField(choices=[(t,t) for t in TIME_CHOICES], default=None)
     def __unicode__(self):
         return self.label
+
 
 class CustomFieldEntry(models.Model):
     customField = models.ForeignKey(CustomField)

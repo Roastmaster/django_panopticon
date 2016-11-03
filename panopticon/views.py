@@ -9,6 +9,7 @@ from django.template import RequestContext
 from django.template import loader
 import panopticon.models as models
 import datetime
+from panopticon.forms import farmForm, changeFarmForm
 # Create your views here.
 
 pages = {"home": "", "productivity": "", "incidents": "", "final": ""}
@@ -47,9 +48,70 @@ def dashboard(request):
     template = loader.get_template('index.html')
     context = {
         'pages': pages,
-        'user': request.user
+        'user': request.user,
+        'farm': request.user.farmemployee.farmowner.current_farm
     }
     return HttpResponse(template.render(context, request))
+
+@login_required
+def edit_site(request):
+    if request.method == "GET":
+        resetPages()
+        pages["edit_site"] = "current"
+        template = loader.get_template("edit_site.html")
+        context = {
+            'user': request.user,
+            'farm': request.user.farmemployee.farmowner.current_farm
+        }
+        return HttpResponse(template.render(context, request))
+    elif request.method == "POST":
+        print ("Hello")
+        farm = request.user.farmemployee.farmowner.current_farm
+        farm.name = request.POST['name']
+        farm.zip = request.POST['zip']
+        farm.address = request.POST['address']
+        farm.state = request.POST['state']
+        farm.save()
+        return dashboard(request)
+
+@login_required
+def add_site(request):
+    if request.method == "GET":
+        resetPages()
+        pages["add_site"] = "current"
+        template = loader.get_template("add_site.html")
+        farmProfile = farmForm()
+        context = {
+            'farmProfile': farmProfile,
+            'user': request.user,
+        }
+        return HttpResponse(template.render(context, request))
+    elif request.method == "POST":
+        farm_form = farmForm(request.POST)
+        if farm_form.is_valid():
+            f = farm_form.save()
+            request.user.farmemployee.farmowner.all_farms.add(f)
+            request.user.farmemployee.farmowner.current_farm = f
+            request.user.farmemployee.farmowner.save()
+            return dashboard(request)
+        else: return farm_form.errors
+
+@login_required
+def change_site(request):
+    if request.method == "GET":
+        template = loader.get_template("change_site.html")
+        changeFarm = changeFarmForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
+        context = {
+            'changeFarm':changeFarm,
+            'user': request.user
+        }
+        return HttpResponse(template.render(context, request))
+    elif request.method == "POST":
+        farm = models.Farm.objects.get(name=request.POST['farm'])
+        request.user.farmemployee.farmowner.current_farm = farm
+        request.user.farmemployee.farmowner.save()
+        return dashboard(request)
+
 
 def productivity(request):
     resetPages()
@@ -87,7 +149,8 @@ def create_user(request):
             newfarm.save()
             newemployee = models.FarmEmployee.objects.create(user=newuser, farm=newfarm)
             newemployee.save()
-            newowner = models.FarmOwner.objects.create(employee=newemployee, farm=newfarm)
+            newowner = models.FarmOwner.objects.create(employee=newemployee, current_farm=newfarm)
+            newowner.all_farms.add(newfarm)
             newowner.save()
             newuser.save()
             newuser = authenticate(username=username,
