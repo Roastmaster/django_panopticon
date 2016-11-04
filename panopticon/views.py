@@ -284,6 +284,9 @@ def add_injury(request):
                                                    last_name=request.POST['employee'].split()[1])[0]
         except IndexError:
             employee = models.FarmEmployee.objects.get(first_name=request.POST['employee'])
+        employee.isIncapacitated = True
+        employee.date_of_recovery = datetime.datetime.now() + timedelta(days=int(time))
+        employee.save()
         i = models.Injury.objects.create(description=desc, employee=employee, farm=farm,
                                          recovery_date = datetime.datetime.now() + timedelta(days=int(time)))
         j = models.Incident.objects.create(description=str("INJURY: EXPECTED RECOVERY IS "+time+"DAYS.  " + desc), farm=farm)
