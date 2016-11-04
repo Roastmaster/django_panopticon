@@ -74,8 +74,8 @@ def get_injuries_perday(time_period):
     for i in range(1, len(time_period)):
         inj.append(len(
             models.Injury.objects.filter(
-                infliction_date__gte=time_period[i-1]).filter(
-                infliction_date__lte=time_period[i]).all()
+                infliction_date__lte=time_period[i-1]).filter(
+                infliction_date__gte=time_period[i]).all()
                 )
             )
     return inj
@@ -94,6 +94,7 @@ def dashboard(request):
     recently_completed = recentlyCompletedTasks(farm)
     seven_days = generate_past_seven_days()
     injuries = get_injuries_perday(seven_days)
+    print(injuries)
 
     context = {
         'num_incapacitated': num_incapacitated,
@@ -107,6 +108,12 @@ def dashboard(request):
         'farm': request.user.farmemployee.farmowner.current_farm
     }
     return HttpResponse(template.render(context, request))
+
+def injuries_per_sector(request):
+    inj = dict()
+    for sector in models.Sector.objects.all():
+        inj[sector.name] = len(models.Injury.objects.filter(sector=sector))
+    return json.dumps(inj)
 
 @login_required
 def edit_site(request):
