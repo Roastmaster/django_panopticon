@@ -17,4 +17,6 @@ urlpatterns = [
     url(r'^incident_data/$', views.incident_data, name="incident_data"),
     url(r'^sectors/$', views.sectors, name="sector_data"),
     url(r'^sectors/add_sector$', views.add_sector, name="add_lead"),
+    url(r'^crew_lead/authenticate_lead/$', views.authenticate_lead, name="authenticate_lead"),
+    url(r'^crew_lead/add_incident/$', views.add_incident_CL, name="add_incident_CL")
 ]

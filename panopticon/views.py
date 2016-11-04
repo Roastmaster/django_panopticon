@@ -13,12 +13,13 @@ from panopticon.forms import farmForm, changeFarmForm, employeeForm, sectorForm,
 import random
 import datetime
 import json
+import ast
 from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
 
-pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit-site":"", "add-site":"", "change-site":""}
+pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit_site":"", "add_site":"", "change_site":""}
 
 @login_required
 def incident_report(request):
@@ -152,6 +153,8 @@ def add_site(request):
 @login_required
 def change_site(request):
     if request.method == "GET":
+        resetPages()
+        pages["change_site"] = "current"
         template = loader.get_template("change_site.html")
         changeFarm = changeFarmForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
         context = {
@@ -170,7 +173,6 @@ def change_site(request):
 def employees(request):
     resetPages()
     pages["employees"] = "current"
-    workers = list()
     template = loader.get_template('index.html')
     context = {
         'pages': pages,
@@ -206,18 +208,19 @@ def add_lead(request):
 @csrf_exempt
 def incident_data(request):
     if request.method == "POST":
-        interval = request.POST['timespan']
-        current_time = datetime.datetime.now()
-        if interval == 'instant':
-            return HttpResponse(json.dumps([current_time.strftime("%Y-%m-%dT%H:%M:%S"), random.randint(0,10)]))
-        elif interval == 'day':
-            data = list()
-            today = datetime.datetime.utcnow().date()-timedelta(days=1)
-            iter_date = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
-            while (iter_date < current_time):
-                iter_date = iter_date + datetime.timedelta(hours=1)
-                data.append([iter_date.strftime("%Y-%m-%d %H:%M:%S"), random.randint(0,10)])
-            return HttpResponse(json.dumps(data))
+        today = datetime.datetime.utcnow().date()
+        data = list()
+        hash_table = dict()
+        for i in models.Incident.objects.all():
+            if i.creation_date not in hash_table.keys():
+                hash_table[i.creation_date] = 0
+            hash_table[i.creation_date] += 1
+
+        for j in hash_table:
+            data.append([j.strftime("%Y-%m-%d %H:%M:%S"), hash_table[j]])
+        data = sorted(data,key=lambda x: x[0])
+
+        return HttpResponse(json.dumps(data))
 
 @login_required
 def productivity(request):
@@ -252,10 +255,11 @@ def add_incident(request):
         return HttpResponse(template.render(context, request))
     if request.method == "POST":
         desc = request.POST['description']
+        reporter = request.POST['reporter'] if 'reporter' in request.POST else ""
         farm = models.Farm.objects.get(name=request.POST['farm'])
         employeesInvolved = request.POST.getlist('employees')
         sector = models.Sector.objects.get(name=request.POST['sector'])
-        i = models.Incident.objects.create(description=desc, farm=farm, sector=sector)
+        i = models.Incident.objects.create(description=desc, farm=farm, sector=sector, reporter=reporter)
         for li in employeesInvolved:
             i.employees_involved.add(li)
         i.report = request.user.farmemployee
@@ -293,7 +297,6 @@ def add_injury(request):
             i.sector = sector
         j.save()
         i.save()
-
         return incidents(request)
 
 
@@ -380,6 +383,45 @@ def user_logout(request):
 
     # Take the user back to the homepage.
     return HttpResponseRedirect('/')
+
+@login_required
+def crewLead_dashboard(request):
+    template = loader.get_template("crew_leads.html")
+    context = {}
+    # context = {
+    #     'farm': models.
+    # }
+    return HttpResponse(template.render(context, request))
+
+@csrf_exempt
+def authenticate_lead(request):
+    if request.method == "POST":
+        workerId = request.POST['workerId']
+        salt = request.POST['salt']
+        assert salt == 'azk'
+        models.CrewLead.objects.get(id=workerId)
+        return HttpResponse(True)
+
+@csrf_exempt
+def add_incident_CL(request):
+    if request.method == "POST" and authenticate_lead(request):
+        workerId = request.POST['workerId']
+        desc = request.POST['description']
+        reporter = models.CrewLead.objects.get(id=workerId)
+        farmName = reporter.sector.farm.name
+        farm = models.Farm.objects.get(name=farmName)
+        salt = request.POST['salt']
+        employees = request.POST['employees']  # Get sents as String
+        employee_list = list(ast.literal_eval(employees))  # Turns String representation into Python list
+        sector = models.Sector.objects.get(name=request.POST['sector'])
+        i = models.Incident.objects.create(description=desc, farm=farm, sector=sector)
+        for li in employee_list:
+            i.employees_involved.add(li)
+        i.reporter.add(reporter)
+        i.save()
+        assert salt == 'azk'
+        return incidents(request)
+
 
 def resetPages():
     for page in pages:

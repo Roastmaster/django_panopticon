@@ -101,7 +101,6 @@ class dateIncapacitated(models.Model):
     days_left = models.IntegerField()
     employee = models.ForeignKey(FarmEmployee)
 
-
 class Dashboard(models.Model):
     recent_incidents = models
     return_to_work = models.ManyToManyField(dateIncapacitated)
