@@ -19,7 +19,7 @@ tr:nth-child(even).hello {
 <header>
     {% if adding_lead != True %}
         <h3 style="display: inline;">Crew Leads: {{ employees|length }}</h3>
-        <button style="background-color: green; display: inline; float: right;"><a href="add_lead" style="text-decoration: none; color: white;">+ Add new employee </a></button>
+        <button style="background-color: green; display: inline; float: right;"><a href="add_lead" style="text-decoration: none; color: white;">+ Add new Worker </a></button>
     {% endif %}
 </header>
 {% if adding_lead == True %}
@@ -46,7 +46,7 @@ tr:nth-child(even).hello {
         <tr id="tr3">
             <th id="th3" style="font-weight: bold;">Name</th>
             <th id="th3" style="...">Qualifications</th>
-            <th id="th3" style="font-weight: bold;">Section</th>
+            <th id="th3" style="font-weight: bold;">Sector</th>
             <th id="th3" style="...">Delete</th>
         </tr>
         {%  for employee in employees %}
