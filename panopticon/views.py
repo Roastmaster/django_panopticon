@@ -167,7 +167,6 @@ def incident_data(request):
         if interval == 'instant':
             return HttpResponse(json.dumps([current_time.strftime("%Y-%m-%dT%H:%M:%S"), random.randint(0,10)]))
         elif interval == 'day':
-            print('wtf')
             data = list()
             today = datetime.datetime.utcnow().date()
             iter_date = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)

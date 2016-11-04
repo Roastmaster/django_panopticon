@@ -49,7 +49,6 @@ class Qualification(models.Model):
         return self.name
 
 class CrewLead(models.Model):
-    #farm = models.OneToOneField(Farm)
     sector = models.ForeignKey(Sector)
     employee = models.OneToOneField(FarmEmployee)
     qualifications = models.ManyToManyField(Qualification, blank=True)
