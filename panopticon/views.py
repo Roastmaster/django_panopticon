@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.template import loader
 import panopticon.models as models
-import datetime
-from panopticon.forms import farmForm, changeFarmForm, employeeForm, sectorForm, incidentForm
+from datetime import datetime, timedelta
+from panopticon.forms import farmForm, changeFarmForm, employeeForm, sectorForm, incidentForm, injuryForm
 import random
 import datetime
 import json
@@ -45,18 +45,62 @@ def assign_new_task(request):
 def task_complete(request):
     pass
 
+def recovering_soon(farm):
+    QS = models.FarmEmployee.objects.filter(farm=farm, isIncapacitated=True,
+                                            date_of_recovery__gte=datetime.datetime.now()-timedelta(days=7))
+    return QS
+
+def recentIncidents(farm):
+    QS = models.Incident.objects.filter(farm=farm,
+                                        creation_date__lte=datetime.datetime.now()-timedelta(days=7))
+    return QS
+
+def percentIncapacitated(farm):
+    QS = models.FarmEmployee.objects.filter(farm=farm,
+                                            isIncapacitated=True)
+    return len(QS), len(models.FarmEmployee.objects.all())
+
+def recentlyCompletedTasks(farm):
+    QS = models.Task.objects.filter(end_date__lte=datetime.datetime.now()-timedelta(days=2))
+    return QS
+
+def generate_past_seven_days():
+    t = datetime.datetime.now()
+    return [t-timedelta(days=i) for i in range(7)]
+
+def get_injuries_perday(time_period):
+    inj = []
+    for i in range(1, len(time_period)):
+        inj.append(len(
+            models.Injury.objects.filter(
+                infliction_date__gte=time_period[i-1]).filter(
+                infliction_date__lte=time_period[i]).all()
+                )
+            )
+    return inj
+
+
 @login_required
 def dashboard(request):
     resetPages()
     pages["home"] = "current"
     template = loader.get_template('index.html')
-    # soon_to_recover = []
+    farm = request.user.farmemployee.farmowner.current_farm
+    soon_to_recover = recovering_soon(request.user.farmemployee.farmowner.current_farm)
     # weather = [] # line graph
-    # percent_incapacitated = # pie graph
-    # recent_incidents =[] # list
-    # recently_completed = []
-    print(request)
+    num_incapacitated, num_healthy = percentIncapacitated(farm)
+    recent_incidents = recentIncidents(farm)
+    recently_completed = recentlyCompletedTasks(farm)
+    seven_days = generate_past_seven_days()
+    injuries = get_injuries_perday(seven_days)
+
     context = {
+        'num_incapacitated': num_incapacitated,
+        'num_healthy': num_healthy,
+        'graph_1_title': 'Healthy vs. Incapacitated',
+        'dsys': seven_days,
+        'injuries' : injuries,
+        'graph_2_title': 'Injuries Per Day Week Of '+str(datetime.datetime.now().strftime("%Y-%m-%d")),
         'pages': pages,
         'user': request.user,
         'farm': request.user.farmemployee.farmowner.current_farm
@@ -81,7 +125,7 @@ def edit_site(request):
         farm.address = request.POST['address']
         farm.state = request.POST['state']
         farm.save()
-        return dashboard(request)
+        return HttpResponseRedirect("/")
 
 @login_required
 def add_site(request):
@@ -102,7 +146,7 @@ def add_site(request):
             request.user.farmemployee.farmowner.all_farms.add(f)
             request.user.farmemployee.farmowner.current_farm = f
             request.user.farmemployee.farmowner.save()
-            return dashboard(request)
+            return HttpResponseRedirect("/")
         else: return farm_form.errors
 
 @login_required
@@ -120,7 +164,7 @@ def change_site(request):
         request.user.farmemployee.farmowner.current_farm = farm
         request.user.farmemployee.farmowner.save()
         request.user.save()
-        return dashboard(request)
+        return HttpResponseRedirect("/")
 
 @login_required
 def employees(request):
@@ -141,11 +185,12 @@ def add_lead(request):
     if request.method == "POST":
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
-        sector = request.POST['sector']
         userFarm = request.user.farmemployee.farmowner.current_farm
         newEmployee = models.FarmEmployee.objects.create(first_name=first_name, last_name=last_name, farm=userFarm)
-        if request.POST['isCrewLead']:
-            cl = models.CrewLead.objects.create(sector=models.Sector.objects.get(name=sector), employee=newEmployee)
+        if 'isCrewLead' in request.POST and request.POST['isCrewLead']:
+            cl = models.CrewLead.objects.create(employee=newEmployee)
+            if 'sector' in request.POST:
+                cl.sector = models.Sector.objects.get(name=request.POST['sector'])
             cl.save()
         newEmployee.save()
         return employees(request)
@@ -166,9 +211,8 @@ def incident_data(request):
         if interval == 'instant':
             return HttpResponse(json.dumps([current_time.strftime("%Y-%m-%dT%H:%M:%S"), random.randint(0,10)]))
         elif interval == 'day':
-            print('wtf')
             data = list()
-            today = datetime.datetime.utcnow().date()
+            today = datetime.datetime.utcnow().date()-timedelta(days=1)
             iter_date = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
             while (iter_date < current_time):
                 iter_date = iter_date + datetime.timedelta(hours=1)
@@ -214,8 +258,44 @@ def add_incident(request):
         i = models.Incident.objects.create(description=desc, farm=farm, sector=sector)
         for li in employeesInvolved:
             i.employees_involved.add(li)
+        i.report = request.user.farmemployee
         i.save()
         return incidents(request)
+
+def add_injury(request):
+    if request.method == "GET":
+        template = loader.get_template('add_injury.html')
+        injury_form = injuryForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
+        context = {
+            'injuryForm': injury_form,
+            'pages':pages,
+        }
+        return HttpResponse(template.render(context, request))
+    if request.method == "POST":
+        desc = request.POST['description']
+        time = request.POST['recoverytime']
+        farm = models.Farm.objects.get(name=request.user.farmemployee.farmowner.current_farm.name)
+        try:
+            employee = models.FarmEmployee.objects.filter(first_name=request.POST['employee'].split()[0],
+                                                   last_name=request.POST['employee'].split()[1])[0]
+        except IndexError:
+            employee = models.FarmEmployee.objects.get(first_name=request.POST['employee'])
+        i = models.Injury.objects.create(description=desc, employee=employee, farm=farm,
+                                         recovery_date = datetime.datetime.now() + timedelta(days=int(time)))
+        j = models.Incident.objects.create(description=str("INJURY: EXPECTED RECOVERY IS "+time+"DAYS.  " + desc), farm=farm)
+        j.employees_involved.add(employee)
+        if 'overseer' in request.POST:
+            overseer = models.CrewLead.objects.get(name=request.POST['overseer'])
+            i.overseer = overseer
+        if 'sector' in request.POST:
+            sector = models.Sector.objects.get(name=request.POST['sector'])
+            j.sector = sector
+            i.sector = sector
+        j.save()
+        i.save()
+
+        return incidents(request)
+
 
 @login_required
 def sectors(request):

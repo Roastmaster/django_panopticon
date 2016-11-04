@@ -46,23 +46,23 @@ tr:nth-child(even) {
                 <article class="box post post-excerpt">
                     <div class="container">
                     <header>
-                    <h3 style="display: inline;">Crew Leads: {{ sectors|length }}</h3>
+                    <h3 style="display: inline;">Sectors Leads: {{ sectors|length }}</h3>
         <button style="background-color: green; display: inline; float: right;"><a href="add_sector" style="text-decoration: none; color: white;">+ Add Sector</a></button>
         </header>
 
                         <table id="table123">
                             <tr id="tr2">
                                 <th id="th3" style="font-weight: bold;">Sector</th>
-                                <th id="th3"style="font-weight: bold;">Crew Lead</th>
+                                <th id="th3"style="font-weight: bold;">Num Incidents</th>
                                 <th id="th3"style="font-weight: bold;">Number of Employees</th>
-                                <th id="th3"style="font-weight: bold;">More Info</th>
+                                <th id="th3"style="font-weight: bold;">Edit</th>
                             </tr>
                         {% for sector in sectors %}
                             <tr id="tr2" style="text-align: center;">
                                 <td id="td3">{{ sector.name }}</td>
-                                <td id="td3">{{ sector.sectors }}</td>
-                                <td id="td3">{{ sector.numemployees }}</td>
-                                <td id="td3"><button>View Profile</button></td>
+                                <td id="td3">{{ sector.num_incidents }}</td>
+                                <td id="td3">{{ sector.num_employees }}</td>
+                                <td id="td3"><button>Delete</button> <button>Edit</button></td>
                             </tr>
                             {% endfor %}
                             </table>

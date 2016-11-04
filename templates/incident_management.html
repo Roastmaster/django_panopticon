@@ -46,8 +46,10 @@ tr:nth-child(even) {
                 <article class="box post post-excerpt">
                     <div class="container">
                         <header>
+
                             {% if adding_lead != True %}
-                                <h3 style="display: inline;">Crew Leads: {{ employees|length }}</h3>
+                                <h3 style="display: inline;">Incidents Leads: {{ incidents|length }}</h3>
+                                <button style="background-color: green; display: inline; float: right;"><a href="/incidents/add_injury/" style="text-decoration: none; color: white;">+ Add new injury </a></button>
                                 <button style="background-color: green; display: inline; float: right;"><a href="/incidents/add_incident/" style="text-decoration: none; color: white;">+ Add new incident </a></button>
                             {% endif %}
                         </header>

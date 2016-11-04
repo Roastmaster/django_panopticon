@@ -29,16 +29,19 @@ class Farm(models.Model):
 
 class FarmEmployee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    age = models.IntegerField(null=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     farm = models.ForeignKey(Farm)
-    #isIncapacitated = models.BooleanField(default=False)
+    isIncapacitated = models.BooleanField(default=False)
+    date_of_recovery = models.DateTimeField(blank=True, null=True)
     def __unicode__(self):
         return self.last_name+", "+self.first_name
 
 class Sector(models.Model):
     name = models.CharField(_("Sector Name"), max_length=100)
     farm = models.ForeignKey(Farm)
+    num_employees = models.IntegerField(default=0)
     def __unicode__(self):
         return self.name
 
@@ -49,7 +52,7 @@ class Qualification(models.Model):
         return self.name
 
 class CrewLead(models.Model):
-    sector = models.ForeignKey(Sector)
+    sector = models.ForeignKey(Sector, null=True)
     employee = models.OneToOneField(FarmEmployee)
     qualifications = models.ManyToManyField(Qualification, blank=True)
     def __unicode__(self):
@@ -67,7 +70,7 @@ class Incident(models.Model):
     description = models.CharField(max_length=1000, blank=False)
     employees_involved = models.ManyToManyField(FarmEmployee)
     reporter = models.ManyToManyField(CrewLead)
-    sector = models.ForeignKey(Sector)
+    sector = models.ForeignKey(Sector, null=True)
     farm = models.ForeignKey(Farm)
     creation_date = models.DateTimeField(auto_now_add=True, null=True)
 
@@ -102,3 +105,12 @@ class dateIncapacitated(models.Model):
 class Dashboard(models.Model):
     recent_incidents = models
     return_to_work = models.ManyToManyField(dateIncapacitated)
+
+class Injury(models.Model):
+    employee = models.ForeignKey(FarmEmployee)
+    overseer = models.ForeignKey(CrewLead, null=True)
+    description = models.CharField(max_length=300)
+    infliction_date = models.DateTimeField(auto_now_add=True, null=True)
+    recovery_date = models.DateTimeField(blank=True, null=True)
+    sector = models.ForeignKey(Sector, null=True)
+    farm = models.ForeignKey(Farm)

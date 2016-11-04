@@ -10,11 +10,6 @@
         <!--[if lte IE 8]><link rel="stylesheet" href="{% static "css/ie8.css" %}" /><![endif]-->
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.min.js"></script>
-        <style>
-             div.inner{
-                padding-bottom: 1em !important; }
-        </style>
     </head>
     <body>
         <!-- Content -->
@@ -30,7 +25,7 @@
                             {% elif pages.incidents == "current" %}
                                 Incident Management
                             {% elif pages.employees == "current" %}
-                                 Worker Management
+                                 Employee Management
                             {% else %}
                                 Request a New Feature
                             {% endif %}
@@ -39,145 +34,41 @@
                             <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>
                         </button>
                     </header>
-                {% if pages.productivity == "current" or pages.incidents == "current" %}
-                    <div id="analytics_container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-                {%  endif %}
                 </article>
                 <article class="box post post-excerpt">
-                    {% if pages.employees == "current" %}
-                        {% include "employee_management.html" %}
-                    {% endif %}
+                    <form action="/incidents/add_injury/" method="post">
+                            {% csrf_token %}
+                            <div class="input-container">
+                                <label for="Farm Name">Employee Name</label>
+                                {{ injuryForm.employee }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Injury Description</label>
+                                {{ injuryForm.description }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Sector</label>
+                                {{ injuryForm.sector }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Crew Leader</label>
+                               {{ injuryForm.crewlead }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="input-container">
+                                <label for="Farm Name">Recovery Time</label>
+                               {{ injuryForm.recoverytime }}
+                                <div class="bar"></div>
+                            </div>
+                            <div class="button-container" style="padding-top:20px">
+                                <button><span>Record Injury</span></button>
+                            </div>
+                    </form>
                 </article>
             </div>
-            <div class="row">
-                <div class="colM">
-                    <canvas id="myChart" height="400px" width="400px"></canvas>
-                </div>
-                <div class="colM">
-                    <canvas id="myChart3" height="400px" width="400px"></canvas>
-                </div>
-            </div>
-            <div class="row">
-                <div class="colM">
-                    <canvas id="myChart2" height="400px" width="400px"></canvas>
-                </div>
-                <div class="colM">
-                    <canvas id="myChart4" height="400px" width="400px"></canvas>
-                </div>
-            </div>
-            <script>
-            var ctx4 = document.getElementById("myChart4");
-
-
-
-            var ctx = document.getElementById("myChart");
-            var data = {
-                labels: [
-                    "Incapacitated",
-                    "Healthy"
-                ],
-                datasets: [
-                    {
-                        data: [{{ num_incapacitated }}, {{ num_healthy }}],
-                        backgroundColor: [
-                            "#FF6384",
-                            "#36A2EB",
-                            "#FFCE56"
-                        ],
-                        hoverBackgroundColor: [
-                            "#FF6384",
-                            "#36A2EB",
-                            "#FFCE56"
-                        ]
-                    }]
-            };
-            var myDoughnutChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: data,
-                options: {
-                    title: {
-                        display: true,
-                        text: "{{ graph_1_title }}"
-                    },
-                    responsive: true,
-                    maintainAspectRatio: true
-                },
-                animation:{
-                    animateScale:true
-                }
-            });
-            var bardata = {
-                labels: [
-                    {% for day in days %}
-                        {{ day }},
-                    {% endfor %}
-                ],
-                datasets: [{
-                    borderWidth: 1,
-                            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-                    data: [
-                        {% for data in injuries %}
-                            {{ data }},
-                        {% endfor %}
-                    ]
-                }]
-            };
-            var ctx2 = document.getElementById("myChart2");
-            var myBarChart = new Chart(ctx2, {
-                type: 'bar',
-                data: bardata,
-                options: {
-                    title: {
-                        display: true,
-                        text: '{{ graph_2_title }}'
-                    },
-                    responsive: true,
-                    maintainAspectRatio: true
-                },
-                animation:{
-                    animateScale:true
-                }
-            });
-            var ctx3 = document.getElementById("myChart3");
-            var myBubbleChart = new Chart(ctx3, {
-                type: 'bubble',
-                data: {
-                    dataset: [{
-                        label: "{{ graph_3_title }}",
-                        data: [{% for point in data3 %} {{ point }}, {% endfor %}],
-                        backgroundColor:"#FF6384",
-                        hoverBackgroundColor: "#FF6384",
-                    }]
-                },
-
-                options: {
-                        elements: {
-                            points: {
-                                borderWidth: 1,
-                                borderColor: 'rgb(0, 0, 0)'
-                            }
-                        }
-                    },
-                animation:{
-                    animateScale:true
-                }
-            });
-        </script>
         </div>
 
 		<!-- Sidebar -->
@@ -192,15 +83,15 @@
                     <li class="{{ pages.home }}"><a href="/">Home</a></li>
                     <li class="{{ pages.productivity }}"><a href="/productivity">Productivity</a></li>
                     <li class="{{ pages.incidents }}"><a href="/incidents">Incident Management</a></li>
-                    <li class="{{ pages.employees }}"><a href="/employees">Worker Management</a></li>
+                    <li class="{{ pages.employees }}"><a href="/employees">Employee Management</a></li>
                     <li class="{{ pages.sectors }}"><a href="/sectors">Zoning Management</a></li>
                 </ul>
             </nav>
             <nav id="nav">
                 <ul>
-                    <li class="{{ pages.edit_site }}"><a href="/edit_site">Edit Facility Info</a></li>
-                    <li class="{{ pages.change_site }}"><a href="/change_site">Change Facility</a></li>
-                    <li class="{{ pages.add_site }}"><a href="/add_site">Add Facility</a></li>
+                    <li class="{{ pages.edit_site }}"><a href="/edit_site">Edit Site</a></li>
+                    <li class="{{ pages.change_site }}"><a href="/change_site">Change Site</a></li>
+                    <li class="{{ pages.add_site }}"><a href="/add_site">Add facility</a></li>
                 </ul>
             </nav>
 
