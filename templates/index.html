@@ -49,6 +49,7 @@
                     {% endif %}
                 </article>
             </div>
+        {% if pages.home == "current" %}
             <div class="row">
                 <div class="colM">
                     <canvas id="myChart" height="400px" width="400px"></canvas>
@@ -65,6 +66,7 @@
                     <canvas id="myChart4" height="400px" width="400px"></canvas>
                 </div>
             </div>
+        {%  endif  %}
             <script>
             var ctx4 = document.getElementById("myChart4");
 

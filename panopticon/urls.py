@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^productivity/', views.productivity, name="productivity"),
     url(r'^incidents/$', views.incidents, name="incidents"),
     url(r'^incidents/add_incident/$', views.add_incident, name="incidents"),
+    url(r'^incidents/add_injury/$', views.add_incident, name="incidents"),
     url(r'^edit_site/$', views.edit_site, name="edit_site"),
     url(r'^add_site/', views.add_site, name="add_site"),
     url(r'^change_site/', views.change_site, name="change_site"),
