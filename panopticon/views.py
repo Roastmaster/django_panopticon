@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
-pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit-site":"", "add-site":"", "change-site":""}
+pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit_site":"", "add_site":"", "change_site":""}
 
 @login_required
 def incident_report(request):
@@ -108,6 +108,8 @@ def add_site(request):
 @login_required
 def change_site(request):
     if request.method == "GET":
+        resetPages()
+        pages["change_site"] = "current"
         template = loader.get_template("change_site.html")
         changeFarm = changeFarmForm(initial={'farm': request.user.farmemployee.farmowner.current_farm.name})
         context = {
@@ -126,7 +128,6 @@ def change_site(request):
 def employees(request):
     resetPages()
     pages["employees"] = "current"
-    workers = list()
     template = loader.get_template('index.html')
     context = {
         'pages': pages,
