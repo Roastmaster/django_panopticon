@@ -49,6 +49,7 @@ class Qualification(models.Model):
         return self.name
 
 class CrewLead(models.Model):
+    #farm = models.OneToOneField(Farm)
     sector = models.ForeignKey(Sector)
     employee = models.OneToOneField(FarmEmployee)
     qualifications = models.ManyToManyField(Qualification, blank=True)
@@ -97,7 +98,6 @@ class CustomFieldEntry(models.Model):
 class dateIncapacitated(models.Model):
     days_left = models.IntegerField()
     employee = models.ForeignKey(FarmEmployee)
-
 
 class Dashboard(models.Model):
     recent_incidents = models
