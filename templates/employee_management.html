@@ -47,14 +47,14 @@ tr:nth-child(even).hello {
             <th id="th3" style="font-weight: bold;">Name</th>
             <th id="th3" style="...">Qualifications</th>
             <th id="th3" style="font-weight: bold;">Sector</th>
-            <th id="th3" style="...">Delete</th>
+            <th id="th3" style="...">Misc. Actions</th>
         </tr>
         {%  for employee in employees %}
             <tr class="hello" style="text-align: center;">
                 <td id="td3">{{ employee.employee.last_name }}, {{ employee.employee.first_name }}</td>
                 <td id="td3">{% for q in employee.qualifications.all %}{{ q }}, {% endfor %}</td>
                 <td id="td3">{{ employee.sector.name }}</td>
-                <td id="td3"><button>Delete</button></td>
+                <td id="td3"><a href="/employees/delete/{{ employee.id }}/"><button>Delete</button></a></td>
             </tr>
         {% endfor %}
     </table>

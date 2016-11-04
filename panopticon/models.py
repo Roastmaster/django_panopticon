@@ -42,6 +42,8 @@ class Sector(models.Model):
     name = models.CharField(_("Sector Name"), max_length=100)
     farm = models.ForeignKey(Farm)
     num_employees = models.IntegerField(default=0)
+    number_of_incidents = models.IntegerField(default=0)
+    number_of_injuries = models.IntegerField(default=0)
     def __unicode__(self):
         return self.name
 

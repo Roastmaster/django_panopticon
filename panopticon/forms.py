@@ -22,9 +22,9 @@ class injuryForm(forms.ModelForm):
 
 class incidentForm(forms.ModelForm):
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter a descriprion for the incident (required)'}))
-    employeesInvolved = forms.ChoiceField([e.last_name, e.last_name] for e in FarmEmployee.objects.all())
-    sector = forms.ChoiceField([s.name, s.name] for s in Sector.objects.all())
-    farm = forms.ChoiceField([f.name, f.name] for f in Farm.objects.all())
+    employeesInvolved = forms.ChoiceField([[e.last_name, e.last_name] for e in FarmEmployee.objects.all()])
+    sector = forms.ChoiceField([[s.name, s.name] for s in Sector.objects.all()])
+    farm = forms.ChoiceField([[f.name, f.name] for f in Farm.objects.all()])
     class Meta:
         model = Incident
         fields = ('description', 'employeesInvolved', 'sector', 'farm')

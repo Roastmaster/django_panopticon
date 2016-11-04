@@ -59,7 +59,7 @@ def recentIncidents(farm):
 def percentIncapacitated(farm):
     QS = models.FarmEmployee.objects.filter(farm=farm,
                                             isIncapacitated=True)
-    return len(QS), len(models.FarmEmployee.objects.all())
+    return len(QS), len(models.FarmEmployee.objects.filter(farm=farm))
 
 def recentlyCompletedTasks(farm):
     QS = models.Task.objects.filter(end_date__lte=datetime.datetime.now()-timedelta(days=2))
@@ -343,6 +343,30 @@ def add_sector(request):
         }
         return HttpResponse(template.render(context, request))
 
+def edit_sector(request,uid):
+    if request.method == "POST":
+        prev = models.Sector.objects.get(id=uid)
+        prev.name = request.POST['name']
+        prev.farm = models.Farm.objects.get(name=request.POST['farm'])
+        prev.overseer = request.POST.getlist('overseer')
+        return sectors(request)
+    else:
+        prev = models.Sector.objects.get(id=uid)
+        sector_form = sectorForm(initial={'farm': prev.farm.name, 'name':prev.name})
+        context = {
+            'sectorForm': sector_form,
+            'pages': pages,
+        }
+        return sectors(request)
+
+def delete_employee(request, uid):
+    f = models.CrewLead.objects.get(id=uid)
+    f.delete()
+    return employees(request)
+
+def delete_sector(request, uid):
+    models.Sector.objects.get(id=uid).delete()
+    return sectors(request)
 
 def create_user(request):
     if request.method == "GET":

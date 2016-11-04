@@ -10,6 +10,9 @@
         <!--[if lte IE 8]><link rel="stylesheet" href="{% static "css/ie8.css" %}" /><![endif]-->
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
+        <script>
+
+        </script>
         <style>
 #table123 {
     font-family: arial, sans-serif;
@@ -62,7 +65,7 @@ tr:nth-child(even) {
                                 <td id="td3">{{ sector.name }}</td>
                                 <td id="td3">{{ sector.num_incidents }}</td>
                                 <td id="td3">{{ sector.num_employees }}</td>
-                                <td id="td3"><button>Delete</button> <button>Edit</button></td>
+                                <td id="td3"><a href="/sectors/delete/{{ sector.id }}/"><button>Delete</button></a><a href="/sectors/edit/{{ sector.id }}/"><button>Edit</button></a></td>
                             </tr>
                             {% endfor %}
                             </table>
