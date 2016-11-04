@@ -266,6 +266,8 @@ def add_incident(request):
         farm = models.Farm.objects.get(name=request.POST['farm'])
         employeesInvolved = request.POST.getlist('employees')
         sector = models.Sector.objects.get(name=request.POST['sector'])
+        sector.number_of_incidents +=1
+        sector.save()
         i = models.Incident.objects.create(description=desc, farm=farm, sector=sector, reporter=reporter)
         for li in employeesInvolved:
             i.employees_involved.add(li)
@@ -303,6 +305,9 @@ def add_injury(request):
             i.overseer = overseer
         if 'sector' in request.POST:
             sector = models.Sector.objects.get(name=request.POST['sector'])
+            sector.number_of_incidents += 1
+            sector.number_of_injuries += 1
+            sector.save()
             j.sector = sector
             i.sector = sector
         j.save()
