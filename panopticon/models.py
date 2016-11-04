@@ -32,7 +32,7 @@ class FarmEmployee(models.Model):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     farm = models.ForeignKey(Farm)
-    isIncapacitated = models.BooleanField(default=False)
+    #isIncapacitated = models.BooleanField(default=False)
     def __unicode__(self):
         return self.last_name+", "+self.first_name
 
@@ -94,7 +94,6 @@ class CustomFieldEntry(models.Model):
     def __unicode__(self):
         return self.value
 
-
 class dateIncapacitated(models.Model):
     days_left = models.IntegerField()
     employee = models.ForeignKey(FarmEmployee)
@@ -102,5 +101,4 @@ class dateIncapacitated(models.Model):
 
 class Dashboard(models.Model):
     recent_incidents = models
-    recent_tasks =
-    return_to_work = models.ManyToManyField(IncapacitationDate)
+    return_to_work = models.ManyToManyField(dateIncapacitated)
