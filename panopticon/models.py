@@ -20,7 +20,7 @@ TIME_CHOICES = [
 
 # Create your models here.
 class Farm(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     address = models.CharField(max_length=100, blank=True)
     zip = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
@@ -39,7 +39,7 @@ class FarmEmployee(models.Model):
         return self.last_name+", "+self.first_name
 
 class Sector(models.Model):
-    name = models.CharField(_("Sector Name"), max_length=100)
+    name = models.CharField(_("Sector Name"), max_length=100, unique=True)
     farm = models.ForeignKey(Farm)
     num_employees = models.IntegerField(default=0)
     number_of_incidents = models.IntegerField(default=0)

@@ -11,6 +11,7 @@
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.min.js"></script>
+
         <style>
              div.inner{
                 padding-bottom: 1em !important; }
@@ -69,9 +70,6 @@
         {%  endif  %}
             <script>
             var ctx4 = document.getElementById("myChart4");
-
-
-
             var ctx = document.getElementById("myChart");
             var data = {
                 labels: [
@@ -156,22 +154,47 @@
                     animateScale:true
                 }
             });
+            var bubbledata = {
+                    datasets: [{% for point in sector_data %}
+                     {
+                         label: "{{ point.3 }}",
+                         data: [
+                                    {
+                                        x: {{ point.1 }},
+                                        y: {{ point.2 }},
+                                        r: {{ point.0 }}
+                                    }
+                                ],
+                         backgroundColor:'#' + (function co(lor){   return (lor +=
+  [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f'][Math.floor(Math.random()*16)])
+  && (lor.length == 6) ?  lor : co(lor); })(''),
+                         hoverBackgroundColor: self.backgroundColor
+                    }{% if not forloop.last %}, {% endif %} {% endfor %}
+            ]};
             var ctx3 = document.getElementById("myChart3");
             var myBubbleChart = new Chart(ctx3, {
                 type: 'bubble',
-                data: {
-                    dataset: [{
-                        label: "{{ graph_3_title }}",
-                        data: [{% for point in data3 %} {{ point }}, {% endfor %}],
-                        backgroundColor:"#FF6384",
-                        hoverBackgroundColor: "#FF6384",
-                    }]
-                },
-
+                data: bubbledata,
                 options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                max: 10,
+                                min: 0,
+                                stepSize: 2
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                max: 10,
+                                min: 0,
+                                stepSize:2
+                            }
+                        }]
+                    },
                         elements: {
                             points: {
-                                borderWidth: 1,
+                                borderWidth: 2,
                                 borderColor: 'rgb(0, 0, 0)'
                             }
                         }
@@ -189,13 +212,14 @@
             <!-- Logo -->
             <h1 id="logo"><a href="#">PANOPTICON</a></h1>
 
+
             {% include "side_nav.html" %}
 
             <!-- Calendar -->
             <section class="box calendar">
                 <div class="inner">
                     <table>
-                        <caption>July 2014</caption>
+                        <caption>November 2016</caption>
                         <thead>
                         <tr>
                             <th scope="col" title="Monday">M</th>
@@ -215,7 +239,7 @@
                             <td><span>3</span></td>
                         </tr>
                         <tr>
-                            <td><span>4</span></td>
+                            <td class="today"><span>4</span></td>
                             <td><span>5</span></td>
                             <td><a href="#">6</a></td>
                             <td><span>7</span></td>
@@ -227,7 +251,7 @@
                             <td><span>11</span></td>
                             <td><span>12</span></td>
                             <td><span>13</span></td>
-                            <td class="today"><a href="#">14</a></td>
+                            <td><a href="#">14</a></td>
                             <td><span>15</span></td>
                             <td><span>16</span></td>
                             <td><span>17</span></td>

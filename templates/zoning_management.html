@@ -10,9 +10,7 @@
         <!--[if lte IE 8]><link rel="stylesheet" href="{% static "css/ie8.css" %}" /><![endif]-->
         <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="https://code.highcharts.com/modules/exporting.js"></script>
-        <script>
-
-        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.min.js"></script>
         <style>
 #table123 {
     font-family: arial, sans-serif;
@@ -38,13 +36,13 @@ tr:nth-child(even) {
                 <article class="box post post-excerpt">
                     <header>
                         <h2 style="display: inline;">
-                                Change facility
+                                Zoning Management
                         </h2>
                         <button style="float: right; display: inline; font-size: 14px;">
                             <a href="/logout" style="color: white; text-decoration: none;">Log Out</a>
                         </button>
                     </header>
-
+                    <canvas id="sector_injuries" width="100" height="50"></canvas>
                 </article>
                 <article class="box post post-excerpt">
                     <div class="container">
@@ -65,7 +63,7 @@ tr:nth-child(even) {
                                 <td id="td3">{{ sector.name }}</td>
                                 <td id="td3">{{ sector.num_incidents }}</td>
                                 <td id="td3">{{ sector.num_employees }}</td>
-                                <td id="td3"><a href="/sectors/delete/{{ sector.id }}/"><button>Delete</button></a><a href="/sectors/edit/{{ sector.id }}/"><button>Edit</button></a></td>
+                                <td id="td3"><button>Delete</button> <button>Edit</button></td>
                             </tr>
                             {% endfor %}
                             </table>
@@ -94,6 +92,7 @@ tr:nth-child(even) {
         <script src="{% static "js/util.js" %}"></script>
         <!--[if lte IE 8]><script src="{% static "js/ie/respond.min.js" %}"></script><![endif]-->
         <script src="{% static "js/main.js" %}"></script>
-        <script src="{% static "js/analytics_chart.js" %}"></script>
+        <script src="{% static "js/sector_injuries.js" %}"></script>
+{#        <script src="{% static "js/chart.js" %}"></script>#}
     </body>
 </html>

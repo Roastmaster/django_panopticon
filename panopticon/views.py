@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -16,9 +17,7 @@ import json
 import ast
 from django.views.decorators.csrf import csrf_exempt
 
-
 # Create your views here.
-
 pages = {"home": "", "productivity": "", "incidents": "", "final": "", "edit_site":"", "add_site":"", "change_site":""}
 
 @login_required
@@ -80,6 +79,10 @@ def get_injuries_perday(time_period):
             )
     return inj
 
+def get_sector_data(farm):
+    QS = models.Sector.objects.filter(farm=farm)
+    return [(s.num_employees, s.number_of_injuries, s.number_of_incidents, s.name) for s in QS]
+
 
 @login_required
 def dashboard(request):
@@ -94,7 +97,8 @@ def dashboard(request):
     recently_completed = recentlyCompletedTasks(farm)
     seven_days = generate_past_seven_days()
     injuries = get_injuries_perday(seven_days)
-    print(injuries)
+    sector_data = get_sector_data(farm)
+    print (sector_data)
 
     context = {
         'num_incapacitated': num_incapacitated,
@@ -103,17 +107,20 @@ def dashboard(request):
         'dsys': seven_days,
         'injuries' : injuries,
         'graph_2_title': 'Injuries Per Day Week Of '+str(datetime.datetime.now().strftime("%Y-%m-%d")),
+        'graph_3_title': 'Injuries vs incidents vs num employees for each sector',
+        'sector_data': sector_data,
         'pages': pages,
         'user': request.user,
         'farm': request.user.farmemployee.farmowner.current_farm
     }
     return HttpResponse(template.render(context, request))
 
+@csrf_exempt
 def injuries_per_sector(request):
     inj = dict()
     for sector in models.Sector.objects.all():
         inj[sector.name] = len(models.Injury.objects.filter(sector=sector))
-    return json.dumps(inj)
+    return HttpResponse(json.dumps(inj))
 
 @login_required
 def edit_site(request):
@@ -194,13 +201,24 @@ def add_lead(request):
     if request.method == "POST":
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
+        if not first_name.isalpha() or not last_name.isalpha():
+            raise forms.ValidationError(_("Please use an alphanumeric name: %(first last)s")
+                                        , params={'first': first_name, 'last': last_name})
         userFarm = request.user.farmemployee.farmowner.current_farm
         newEmployee = models.FarmEmployee.objects.create(first_name=first_name, last_name=last_name, farm=userFarm)
         if 'isCrewLead' in request.POST and request.POST['isCrewLead']:
             cl = models.CrewLead.objects.create(employee=newEmployee)
-            if 'sector' in request.POST:
-                cl.sector = models.Sector.objects.get(name=request.POST['sector'])
             cl.save()
+            if 'sector' in request.POST and request.POST['sector']:
+                s = models.Sector.objects.get(name=request.POST['sector'])
+                s.num_employees += 1
+                s.save()
+                cl.sector = s
+                cl.save()
+        elif 'sector' in request.POST and request.POST['sector']:
+            s = models.Sector.objects.get(name=request.POST['sector'])
+            s.num_employees += 1
+            s.save()
         newEmployee.save()
         return employees(request)
     else:
@@ -330,8 +348,13 @@ def add_sector(request):
     if request.method == "POST":
         name = request.POST['name']
         farm = models.Farm.objects.get(name=request.POST['farm'])
+        SQS = models.Sector.objects.filter(farm=farm)
+        if len(SQS) > 0:
+            raise forms.ValidationError("You must choose a unique sector name")
         newSector = models.Sector.objects.create(name=name, farm=farm)
         overseer = request.POST.getlist('overseer')
+        if overseer:
+            newSector.overseer = overseer
         newSector.save()
         return sectors(request)
     else:
@@ -351,13 +374,14 @@ def edit_sector(request,uid):
         prev.overseer = request.POST.getlist('overseer')
         return sectors(request)
     else:
+        template = loader.get_template('add_sector.html')
         prev = models.Sector.objects.get(id=uid)
         sector_form = sectorForm(initial={'farm': prev.farm.name, 'name':prev.name})
         context = {
             'sectorForm': sector_form,
             'pages': pages,
         }
-        return sectors(request)
+        return HttpResponse(template.render(context, request))
 
 def delete_employee(request, uid):
     f = models.CrewLead.objects.get(id=uid)
@@ -374,7 +398,11 @@ def create_user(request):
     else:
         if 'new_user' in request.POST:
             username = request.POST['new_user']
+
             password = request.POST['new_pass']
+            password2 = request.POST['new_pass']
+            if password != password2:
+                raise forms.ValidationError("Your two passwords must match!")
             email = request.POST['new_email']
             first = request.POST['new_first']
             last = request.POST['new_last']
@@ -388,6 +416,7 @@ def create_user(request):
             newemployee.save()
             newowner = models.FarmOwner.objects.create(employee=newemployee, current_farm=newfarm)
             newowner.all_farms.add(newfarm)
+            newowner.current_farm=newfarm
             newowner.save()
             newuser.save()
             newuser = authenticate(username=username,
@@ -408,12 +437,12 @@ def create_user(request):
                 if user:
                     if user.is_active:
                         login(request, user)
-                        return dashboard(request)
+                        return HttpResponseRedirect("/")
                     else:
                         return HttpResponse("Your account is disabled.")
                 else:
                     print("Invalid login details: {0}, {1}".format(username, password))
-                    return "Invalid login details: {0}, {1}".format(username, password)
+                    return HttpResponse("Invalid login details")
 
 @login_required
 def user_logout(request):

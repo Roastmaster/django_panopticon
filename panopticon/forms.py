@@ -4,11 +4,13 @@ from panopticon.models import Sector, FIELD_CHOICES, TIME_CHOICES
 from panopticon.models import Farm, Incident, Injury
 from panopticon.models import CrewLead, FarmEmployee
 
+
 class changeFarmForm(forms.ModelForm):
     farm = forms.ChoiceField([f.name, f.name] for f in Farm.objects.all())
     class Meta:
         model = Farm
         fields = ("farm",)
+
 
 class injuryForm(forms.ModelForm):
     employee = forms.ChoiceField([[f.first_name +" "+ f.last_name, f.first_name+" "+ f.last_name] for f in FarmEmployee.objects.all()])
@@ -20,6 +22,7 @@ class injuryForm(forms.ModelForm):
         model = Injury
         fields = ("employee", "description", "sector", "crewlead", "recoverytime")
 
+
 class incidentForm(forms.ModelForm):
     description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter a descriprion for the incident (required)'}))
     employeesInvolved = forms.ChoiceField([[e.last_name, e.last_name] for e in FarmEmployee.objects.all()])
@@ -29,6 +32,11 @@ class incidentForm(forms.ModelForm):
         model = Incident
         fields = ('description', 'employeesInvolved', 'sector', 'farm')
 
+    def clean(self):
+        pass
+
+
+
 class farmForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter a name for your new farm (required)'}))
     address = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Street address'}))
@@ -37,6 +45,9 @@ class farmForm(forms.ModelForm):
     class Meta:
         model = Farm
         fields = ("name", "address", "state", "zip")
+    def cleaned_data(self):
+        pass
+
 
 class sectorForm(forms.ModelForm):
     farm = forms.ChoiceField([(f.name, f.name) for f in Farm.objects.all()], required=False)
@@ -46,12 +57,25 @@ class sectorForm(forms.ModelForm):
         model = Sector
         fields = ("name", "farm", 'overseer')
 
+    def cleaned_data(self, user):
+
+        return True
+
 class employeeForm(forms.ModelForm):
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name (required)'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False)
     sector = forms.ChoiceField([[s.name,s.name] for s in Sector.objects.all()], required=False)
     farm = forms.ChoiceField([(f, f) for f in Farm.objects.all()], required=False)
     isCrewLead = forms.BooleanField(required=False)
+
+    def clean(self):
+        first = self.cleaned_data['first_name']
+        last = self.cleaned_data['last_name']
+        if not first.isalpha() or not last.isalpha():
+            raise forms.ValidationError(_("Please use an alphanumeric name: %(first last)s")
+                                  ,params={'first':first, 'last':last})
+        return True
+
     class Meta:
         model = FarmEmployee
         fields = ('first_name', 'last_name', 'farm', 'sector')
@@ -59,6 +83,7 @@ class employeeForm(forms.ModelForm):
 
 class qualificationsForm(forms.ModelForm):
     qualificationName = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name (required)'}), required=True)
+
 
 class CustomFieldForm(forms.ModelForm):
     sector = forms.ChoiceField([(s.name, s.name) for s in Sector.objects.all()],
